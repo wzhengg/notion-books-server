@@ -1,4 +1,4 @@
-import { Schema, model } from 'mongoose';
+import { Model, Schema, model } from 'mongoose';
 import bcrypt from 'bcrypt';
 
 interface IUser {
@@ -6,7 +6,13 @@ interface IUser {
   password: string;
 }
 
-const userSchema = new Schema<IUser>({
+interface IUserMethods {
+  isValidPassword(password: string): Promise<boolean>;
+}
+
+type UserModel = Model<IUser, {}, IUserMethods>;
+
+const userSchema = new Schema<IUser, UserModel, IUserMethods>({
   email: { type: String, required: true },
   password: { type: String, required: true },
 });
@@ -19,5 +25,9 @@ userSchema.pre('save', async function (next) {
   next();
 });
 
-const User = model<IUser>('User', userSchema);
+userSchema.methods.isValidPassword = async function (password) {
+  return bcrypt.compare(password, this.password);
+};
+
+const User = model<IUser, UserModel>('User', userSchema);
 export default User;

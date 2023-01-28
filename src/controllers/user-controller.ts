@@ -1,5 +1,10 @@
 import { Request, Response } from 'express';
+import jwt from 'jsonwebtoken';
 import User from '../models/user-model';
+
+function generateToken(id: string) {
+  return jwt.sign({ id }, `${process.env.JWT_SECRET}`, { expiresIn: '30d' });
+}
 
 async function createUser(req: Request, res: Response) {
   const { email, password } = req.body;
@@ -19,7 +24,11 @@ async function createUser(req: Request, res: Response) {
   }
 
   res.status(201);
-  res.json(user);
+  res.json({
+    id: user.id,
+    email,
+    token: generateToken(user.id),
+  });
 }
 
 export { createUser };

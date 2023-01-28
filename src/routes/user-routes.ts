@@ -2,7 +2,7 @@ import { Router } from 'express';
 import asyncHandler from 'express-async-handler';
 import { body } from 'express-validator';
 import { validateRequest } from '../middleware/validation-middleware';
-import { createUser } from '../controllers/user-controller';
+import { createUser, loginUser } from '../controllers/user-controller';
 
 const router = Router();
 
@@ -21,6 +21,14 @@ router.post(
     .escape(),
   validateRequest,
   asyncHandler(createUser)
+);
+
+router.post(
+  '/login',
+  body('email', 'Email is required').trim().notEmpty().escape(),
+  body('password', 'Password is required').trim().notEmpty().escape(),
+  validateRequest,
+  asyncHandler(loginUser)
 );
 
 export default router;

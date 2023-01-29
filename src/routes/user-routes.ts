@@ -1,8 +1,9 @@
 import { Router } from 'express';
 import asyncHandler from 'express-async-handler';
-import { body } from 'express-validator';
+import { header, body } from 'express-validator';
 import { validateRequest } from '../middleware/validation-middleware';
-import { createUser, loginUser } from '../controllers/user-controller';
+import { addUserToReq } from '../middleware/auth-middleware';
+import { createUser, loginUser, getUser } from '../controllers/user-controller';
 
 const router = Router();
 
@@ -29,6 +30,21 @@ router.post(
   body('password', 'Password is required').trim().notEmpty().escape(),
   validateRequest,
   asyncHandler(loginUser)
+);
+
+router.get(
+  '/info',
+  header('authorization', 'Token is required')
+    .exists()
+    .bail()
+    .custom((value) => {
+      const [bearer, token] = value.split(' ');
+      return bearer === 'Bearer' && token;
+    })
+    .withMessage("authorization must have form 'Bearer <token>'"),
+  validateRequest,
+  asyncHandler(addUserToReq),
+  asyncHandler(getUser)
 );
 
 export default router;

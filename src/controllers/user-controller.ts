@@ -55,4 +55,18 @@ async function loginUser(req: Request, res: Response) {
   });
 }
 
-export { createUser, loginUser };
+async function getUser(req: Request, res: Response) {
+  const user = await User.findById(req.userid);
+
+  if (!user) {
+    res.status(400);
+    throw new Error(`Could not find user with id ${req.userid}`);
+  }
+
+  res.json({
+    id: user.id,
+    email: user.email,
+  });
+}
+
+export { createUser, loginUser, getUser };
